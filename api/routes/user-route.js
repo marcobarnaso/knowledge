@@ -1,12 +1,9 @@
 import express from "express";
-import { register } from "../controllers/user-controller.js";
-//import { verifyToken } from "../middleware/jwt.js";
+import { register } from "../controllers/user-controller.js"
 
-const router = express.Router();
+const router = new express.Router();
 
-router.post("/registerUser", register)
-//router.delete("/:id", verifyToken, deleteUser);
-//router.get("/:id", getUser);
+router.post('/register', register)
 
 export default router;
 

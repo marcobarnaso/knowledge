@@ -1,17 +1,6 @@
 import mongoose from "mongoose"
 
-// const connect_db = ()=>{
-//   mongoose.connect(process.env.MONGODB_URL, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   }).then(()=> {
-//     console.log('Connected to database.')
-//   }).catch((err)=>{
-//     console.error(`Error connecting Database: ${err}`)
-//   })
-// }
-
-mongoose.set("strictQuery", true)
+mongoose.set("strictQuery", false)
 
 const connect_db = async () => {
   try {
@@ -22,4 +11,4 @@ const connect_db = async () => {
   }
 };
 
-export {connect_db}
+export { connect_db }
