@@ -1,32 +1,53 @@
-import User from "../models/user-model.js"
-import bcrypt from "bcrypt"
+import User from "../models/user-model.js";
+import bcrypt from "bcrypt";
 
 export const register = async (req, res, next) => {
-    try {
-      const hash = bcrypt.hashSync(req.body.password, 5);
-      const newUser = new User({
-        ...req.body,
-        password: hash,
-      });
-      await newUser.save();
-      res.status(201).send("User has been created.");
-    } catch (err) {
-      next(err);
-    }
-  };
+  try {
+    const hash = bcrypt.hashSync(req.body.password, 8);
+    const newUser = new User({
+      ...req.body,
+      password: hash,
+    });
+    await newUser.save();
+    res.status(201).send("User has been created.");
+  } catch (err) {
+    next(err);
+  }
+};
 
+export const login = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ username: req.body.username });
 
-// export const deleteUser = async (req, res, next) => {
-//   const user = await User.findById(req.params.id);
+    if (!user) return next(createError(404, "User not found!"));
 
-//   if (req.userId !== user._id.toString()) {
-//     return next(createError(403, "You can delete only your account!"));
-//   }
-//   await User.findByIdAndDelete(req.params.id);
-//   res.status(200).send("deleted.");
-// };
-// export const getUser = async (req, res, next) => {
-//   const user = await User.findById(req.params.id);
+    const isCorrect = bcrypt.compareSync(req.body.password, user.password);
+    if (!isCorrect)
+      return next(createError(400, "Wrong password or username!"));
 
-//   res.status(200).send(user);
-// };
+    const token = jwt.sign(
+      { _id: user._id.toString() },
+      process.env.JWT_SECRET
+    );
+
+    const { password, ...info } = user._doc;
+    res
+      .cookie("accessToken", token, {
+        httpOnly: true,
+      })
+      .status(200)
+      .send(info);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const logout = async (req, res) => {
+  res
+    .clearCookie("accessToken", {
+      sameSite: "none",
+      secure: true,
+    })
+    .status(200)
+    .send("User has been logged out.");
+};
