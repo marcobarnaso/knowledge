@@ -1,5 +1,7 @@
 import User from "../models/user-model.js";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import createError from "../utils/create-error.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -25,18 +27,18 @@ export const login = async (req, res, next) => {
     if (!isCorrect)
       return next(createError(400, "Wrong password or username!"));
 
-    const token = jwt.sign(
-      { _id: user._id.toString() },
-      process.env.JWT_SECRET
-    );
+    const token = jwt.sign({ _id: user._id.toString() }, process.env.jwtSecret);
 
-    const { password, ...info } = user._doc;
+    const { password, tokens, ...info } = user._doc; // remove password and token from user info, user._doc is the user object
     res
       .cookie("accessToken", token, {
-        httpOnly: true,
+        // set cookie
+        httpOnly: true, // only accessible by the web server
+        sameSite: "none", // to allow cross-site cookies
+        secure: true, // to allow cross-site cookies  (only in https)
       })
       .status(200)
-      .send(info);
+      .send({ status: "logged in!", userInfo: info });
   } catch (err) {
     next(err);
   }
@@ -45,9 +47,10 @@ export const login = async (req, res, next) => {
 export const logout = async (req, res) => {
   res
     .clearCookie("accessToken", {
-      sameSite: "none",
-      secure: true,
+      // clear cookie
     })
     .status(200)
     .send("User has been logged out.");
 };
+
+// TODO: change password, and delete account

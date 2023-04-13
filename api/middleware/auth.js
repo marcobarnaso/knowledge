@@ -1,25 +1,15 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import createError from "../utils/create-error.js";
 
 const auth = async (req, res, next) => {
-  try {
-    const token = req.header("Authorization").replace("Bearer ", "");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne({
-      _id: decoded._id,
-      "tokens.token": token,
-    });
+  const token = req.cookies.accessToken;
+  if (!token) return next(createError(401, "You are not authenticated!"));
 
-    if (!user) {
-      throw new Error();
-    }
-
-    req.token = token;
-    req.user = user;
+  jwt.verify(token, process.env.jwtSecret, async (err, payload) => {
+    if (err) return next(createError(403, "Token is not valid!"));
+    res.send({message: "You are authenticated!", payload});
     next();
-  } catch (e) {
-    res.status(401).send({ error: "Please authenticate." });
-  }
+  });
 };
 
 export default auth;

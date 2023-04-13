@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const rentalSchema = new Schema(
   {
-    Adress: {
+    address: {
       type: String,
       required: true,
       unique: true,

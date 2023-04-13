@@ -1,4 +1,4 @@
-import { Rental } from "../models/rental-model.js";
+import Rental from "../models/rental-model.js";
 import multer from "multer";
 
 export const registerRental = async (req, res, next) => {
@@ -12,17 +12,17 @@ export const registerRental = async (req, res, next) => {
 };
 
 const upload = multer({
-    limits: {
-        fileSize: 10000000
-    },
-    fileFilter(req, file, cb) {
-        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new Error('Please upload an image'))
-        }
-  
-        cb(undefined, true)
+  limits: {
+    fileSize: 10000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error("Please upload an image"));
     }
-  })
+
+    cb(undefined, true);
+  },
+});
 
 export const rentalPicture = async (req, res) => {
   try {
